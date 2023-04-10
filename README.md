@@ -294,4 +294,4 @@ __UNSTABLE__  Alpha only few method are implemented using Postgres.
 
 ## License
 
-MIT
+MIT / GPL-v3
