@@ -25,7 +25,7 @@ module.exports = function create(path, opts, keys) {
     db.opts = opts
     // wrap with a use api/* function ...
     db = require('./pool.js')(db)
-    db = require('./createHistoryStream.js')(db)
+    db = require('./api/createHistoryStream.js')(db)
     db = require('./api/publish.js')(db)
     db = require('./api/get.js')(db)
     db = require('./api/last.js')(db)
