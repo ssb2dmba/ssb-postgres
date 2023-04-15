@@ -22,10 +22,9 @@ const PCont = require('pull-cont')
 
 module.exports = function implementation(db) {
 
-    let client = undefined;
 
-    const _createHistoryStream = function (streamOpts, client, done) {
-
+    db.createHistoryStream = function (streamOpts) {
+        let client = undefined;
         const opts = u.options(streamOpts)
         const id = opts.id;
         const seq = opts.sequence || opts.seq || 0;
@@ -57,6 +56,13 @@ module.exports = function implementation(db) {
             });
 
             const stream = client.query(queryStream);
+
+            const done = function () {
+                if (client) {
+                    client.release();
+                    client = null
+                }
+            }
 
             // Drain buffer and unpause stream
             function drain() {
@@ -124,14 +130,5 @@ module.exports = function implementation(db) {
         )
     };
 
-    db.createHistoryStream = (streamOpts) => {
-        return _createHistoryStream(streamOpts, client, () => {
-            try {
-                client.release()
-            } catch (e) {
-                console.log(e.message) // client already released
-            }
-        })
-    }
     return db;
 }
