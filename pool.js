@@ -23,15 +23,14 @@ module.exports = function init(db) {
         console.log(`Postgres is online  at ${client.user}@${client.host}/${client.database}`)
         client.release();
     }
-
-
-    const credentials = {
-        user: "ssb",
-        host: "localhost",
-        database: "ssb",
-        password: "ssb",
-        port: 5432,
-    };
+    if (!db.opts) db.opts = {}
+    const credentials = db.opts.postgres ||  {
+        "user": "ssb",
+        "host": "localhost",
+        "database": "ssb",
+        "password": "ssb",
+        "port": 5432
+    }
 
     db.pool = new Pool(credentials);
     // await for the pool to be up

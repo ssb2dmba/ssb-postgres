@@ -41,7 +41,7 @@
     "ssb-feed": "^2.2.1",
     "ssb-private1": "^1.0.1",
     "ssb-tribes": "^0.1.2",
-    "tap-spec": "^5.0.0",
+    "tap-spec": "^2.2.2",
     "tape": "^5.3.1",
     "typewiselite": "^1.0.0"
   },

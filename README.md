@@ -26,61 +26,7 @@ messages to that feed, verify a feed created by someone else, stream messages to
 *Unforgeable* means that only the owner of a feed can modify that feed, as enforced by digital signing 
 (see [Security properties](#security-properties)).
 
-This property makes `ssb-postgres` useful for peer-to-peer applications. `ssb-postgres` also makes it easy to encrypt 
-messages.
-
-# Example
-
-In this example, we create a feed, post a signed message to it, then create a stream that reads from the feed. **Note:** `ssb-server` includes the `ssb-postgres` dependency already, so the example here uses this as a plugin for `secret-stack`.
-
-``` js
-/**
- * create an ssb-postgres instance and add a message to it.
- */
-var pull = require('pull-stream')
-
-//create a secret-stack instance and add ssb-postgres, for persistence.
-var createApp = require('secret-stack')({})
-  .use(require('ssb-postgres'))
-
-
-// create the db instance.
-// Only one instance may be created at a time due to os locks on port and database files.
-
-var app = createApp(require('ssb-config'))
-
-//your public key, the default key of this instance.
-
-app.id
-
-//or, called remotely
-
-app.whoami(function (err, data) {
-  console.log(data.id) //your id
-})
-
-// publish a message to default identity
-//  - feed.add appends a message to your key's chain.
-//  - the `type` attribute is required.
-
-app.publish({ type: 'post', text: 'My First Post!' }, function (err, msg) {
-  // the message as it appears in the database:
-  console.log(msg)
-
-  // and its hash:
-  console.log(msg.key)
-})
-
-
-// collect all messages for a particular keypair into an array, calls back, and then ends
-// https://github.com/pull-stream/pull-stream/blob/master/docs/sinks/collect.md
-pull(
-  app.createHistoryStream({id: app.id}),
-  pull.collect(function (err, messagesArray) {
-    console.log(messagesArray)
-  })
-)
-```
+This property makes `ssb-postgres` useful for peer-to-peer applications. `ssb-postgres`.
 
 # Concepts
 
@@ -180,16 +126,12 @@ instead of `app.db.get` as it would be with all the other `ssb-*` plugins.
 
 ## db.get: async
 ```js
-db.get(id | seq | opts, cb) // cb(error, message)
+db.get(id | opts, cb) // cb(error, message)
 ```
 
 Get a message by its hash-id.
 
 * If `id` is a message id, the message is returned.
-* If `seq` is provided, the message at that offset. 
-* If `opts` is passed, the message id is taken from either `opts.id` or `opts.key`.
-* If `opts.private = true` the message will be decrypted if possible.
-* If `opts.meta = true` is set, or `seq` is used, the message will be in `{key, value: msg, timestamp}` format. 
 Otherwise the raw message (without key and timestamp) are returned. This is for backwards compatibility reasons.
 
 Given that most other apis (such as createLogStream) by default return `{key, value, timestamp}` it's 
@@ -219,35 +161,10 @@ the message's timestamp, sequence number, previous-hash, and signature.
  - `content` (object): The content of the message.
    - `.type` (string): The object's type.
 
-
-## db.del: async 
-
-> ⚠ This could break your feed. Please don't run this unless you understand it.
-
-Delete a message by its message key or a whole feed by its key. This only deletes the message from your local 
-database, not the network, and could have unintended consequences if you try to delete a single message in 
-the middle of a feed.
-
-The intended use-case is to delete all messages from a given feed *or* deleting a single message from the tip 
-of your feed if you're completely confident that the message hasn't left your device.
-
-```js
-//Delete message
-db.del(msg.key, (err, key) => {
-  if (err) throw err
-})
-```
-
-```js
-//Delete all author messages
-db.del(msg.value.author, (err, key) => {
-  if (err) throw err
-})
-```
-
+   
 ## db.whoami: async
 ```js
-db.whoami(cb) // cb(error, {"id": FeedID })
+db.whoami(cb)
 ```
 Get information about the current ssb-server user.
 
@@ -259,27 +176,17 @@ db.createHistoryStream(id, seq, live) -> PullSource
 db.createHistoryStream({ id, seq, live, limit, keys, values, reverse }) -> PullSource
 
 ```
-
 Create a stream of the history of `id`. If `seq > 0`, then only stream messages with sequence numbers greater 
 than `seq`. If `live` is true, the stream will be a 
 [live mode](https://github.com/dominictarr/pull-level#example---reading)
 
-`createHistoryStream` and `createUserStream` serve the same purpose.
-
-`createHistoryStream` exists as a separate call because it provides fewer range parameters, which makes it 
-safer for RPC between untrusted peers.
-
-> Note: since `createHistoryStream` is provided over the network to anonymous peers, not all options are 
-supported. `createHistoryStream` does not decrypt private messages.
-
+`
 - `id` *(FeedID)* The id of the feed to fetch.
 - `seq` *(number)* If `seq > 0`, then only stream messages with sequence numbers greater than or equal to `seq`. 
 Defaults to `0`.
-- `live` *(boolean)*: Keep the stream open and emit new messages as they are received. Defaults to `false`
-- `keys` *(boolean)*: Whether the `data` event should contain keys. If set to `true` and `values` set to 
-`false` then `data` events will simply be keys, rather than objects with a `key` property. Defaults to `true`
-- `values` *(boolean)* Whether the `data` event should contain values. If set to `true` and `keys` set to 
-`false` then `data` events will simply be values, rather than objects with a `value` property. Defaults to `true`.
+
+*not implemented:*
+
 - `limit` *(number)* Limit the number of results collected by this stream. This number represents a *maximum* 
 number of results and may not be reached if you get to the end of the data first. A value of `-1` means there 
 is no limit. When `reverse=true` the highest keys will be returned instead of the lowest keys. Defaults to `false`.
@@ -291,6 +198,34 @@ works, a reverse seek will be slower than a forward seek. Defaults to `false`.
 
 __UNSTABLE__  Alpha only few method are implemented using Postgres.
 
+
+## Configuration
+
+In your `.ssb/config` fill the values as in this sample:
+
+```
+{
+  "connections": {
+    "incoming": {
+      "net": [
+        { "scope": "public", "external": ["delog.in"], "transform": "shs", "port": 8008 },
+        { "scope": "private", "transform": "shs", "port": 8008, "host": "192.168.0.45" } 
+      ]
+    
+    },
+    "outgoing": {
+      "net": [{ "transform": "shs" }]
+    }
+  },
+  "postgres": {
+        "user": "ssb",
+        "host": "localhost",
+        "database": "ssb",
+        "password": "ssb",
+        "port": 5432
+    }
+}
+``` 
 
 ## License
 

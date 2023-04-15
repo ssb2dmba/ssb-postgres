@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 const create = require('./create')
 const valid = require('./lib/validators');
 const version = require('./package.json').version;
@@ -70,7 +69,10 @@ module.exports = {
             addUnboxer: ssb.addUnboxer,
             pool: ssb.pool, // kindly expose pg pool API
             createFeed: ssb.createFeed, // for the server to publish itself & tests
-            post: ssb.post
+            post: ssb.post,
+            last: {
+                get: ssb.last.get
+            }
         }
     }
 }

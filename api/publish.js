@@ -25,7 +25,7 @@ module.exports = function implementation(db) {
                 insertMessage(db.pool, data);
                 setTimeout(() => { // setTimeout help test works ...
                     cb(null, data)
-                }, 150)
+                }, 50)
             }
         })
     }
