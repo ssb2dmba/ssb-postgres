@@ -119,16 +119,6 @@ module.exports = function (keys, opts) {
 
     let writing = false
 
-    const credentials = {
-        user: "ssb",
-        host: "localhost",
-        database: "ssb",
-        password: "ssb",
-        port: 5432,
-    };
-
-    db.pool = new Pool(credentials);
-
     async function insertMessage(pool, message) {
         const text = `
       INSERT INTO message (message)
