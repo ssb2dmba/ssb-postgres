@@ -19,18 +19,16 @@ module.exports = function implementation(db) {
 
 
     async function selectLast(pool, author) {
-        const text = "select * from message where author->>'author' = ($1) order by id desc limit 1";
-        return await pool.query(text, [key]);
+        const text = "select * from message where message->'value'->>'author' = ($1) order by message->'value'->>'id' desc limit 1";
+        return await pool.query(text, [author]);
     }
 
     db.last = {}
     db.last.get = async function (key, cb) {
-
         if (typeof key === 'object') {
             meta = key.meta
             key = key.id
         }
-
         try {
             let data = await selectLast(db.pool, key);
             if (data.rowCount == 1) {

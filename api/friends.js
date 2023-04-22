@@ -33,7 +33,7 @@ module.exports = function implementation(db) {
                 ORDER by message->'sequence' desc 
                 LIMIT 1
             `
-            return await pool.query(query, queryParams)
+            return await db.pool.query(query, queryParams)
         };
         let result
         let error = null

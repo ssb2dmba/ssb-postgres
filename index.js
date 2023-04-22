@@ -41,7 +41,7 @@ const manifest = {
 module.exports = {
     manifest: manifest,
     permissions: {
-        master: {allow: ['publish', 'invite,create'], deny: null},
+        master: {allow: ['publish', 'invite,create','invite,use'], deny: null},
         anonymous: {allow: ['publish', 'invite,use', 'createHistoryStream']}
     },
     init: function (api, opts) {
