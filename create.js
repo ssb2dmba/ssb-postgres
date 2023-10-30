@@ -30,7 +30,8 @@ module.exports = function create(path, opts, keys) {
     db = require('./api/get.js')(db)
     db = require('./api/last.js')(db)
     db = require('./api/friends.js')(db)
-
+    db = require('./api/did.js')(db)
+    
     db.createFeed = function (keys) {
         if (!keys) throw Error()
 

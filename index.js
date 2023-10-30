@@ -73,6 +73,9 @@ module.exports = {
             last: {
                 get: ssb.last.get
             },
+            did: {
+                get: ssb.did.get
+            },
             friends: { // for compat with ssb-invite
                 isFollowing: ssb.isFollowing
             }
