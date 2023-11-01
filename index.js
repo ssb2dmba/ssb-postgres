@@ -44,14 +44,14 @@ module.exports = {
         master: {allow: ['publish', 'invite,create','invite,use'], deny: null},
         anonymous: {allow: ['publish', 'invite,use', 'createHistoryStream']}
     },
-    init: function (api, opts) {
+    init: function (server, opts) {
 
         // main interface
         const ssb = create(opts.path, opts, opts.keys);
+        ssb.sbot=server
 
         //treat the main feed as remote, because it's likely handled like that by others.
         const feed = ssb.createFeed(opts.keys, {remote: true});
-
         return self = {
             keys: opts.keys,
             id: opts.keys.id,
@@ -78,8 +78,8 @@ module.exports = {
             },
             friends: { // for compat with ssb-invite
                 isFollowing: ssb.isFollowing
-            }
-
+            },
+            emit: ssb.sbot.emit
         }
     }
 }

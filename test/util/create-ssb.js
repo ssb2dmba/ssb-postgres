@@ -15,7 +15,6 @@ module.exports = function createSSB(name = randomName(), opts = {}, plugins) {
     const dir = path.join(os.tmpdir(), name);
 
     if (plugins) {
-        console.log(plugins)
         plugins.forEach((plugin) => stack.use(plugin))
     }
 

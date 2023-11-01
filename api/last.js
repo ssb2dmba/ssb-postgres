@@ -19,7 +19,7 @@ module.exports = function implementation(db) {
 
 
     async function selectLast(pool, author) {
-        const text = "select * from message where message->'value'->>'author' = ($1) order by message->'value'->>'id' desc limit 1";
+        const text = "select * from message where message->'value'->>'author' = ($1) order by message->'value'->>'sequence' desc limit 1";
         return await pool.query(text, [author]);
     }
 

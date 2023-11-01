@@ -58,6 +58,10 @@ module.exports = function implementation(db) {
             const stream = client.query(queryStream);
 
             const done = function () {
+                // emit an event with the second parameter being an indicator that the queried stream is connected (self createHistoryStream)
+                if (client) {
+                    db.sbot.emit('db:createHistoryStream', id, db.sbot.peers[id])
+                }
                 if (client) {
                     client.release();
                     client = null
